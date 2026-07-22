@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Dado 3D Offline</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #2c3e50; font-family: sans-serif; color: white; margin: 0; }
+        .scene { width: 200px; height: 200px; perspective: 1000px; margin-bottom: 50px; }
+        .cube { 
+            width: 100%; height: 100%; position: relative; 
+            transform-style: preserve-3d; 
+            /* A transição agora é aplicada suavemente */
+            transition: transform 3s cubic-bezier(0.2, 0, 0, 1); 
+        }
+        
+        .face { 
+            position: absolute; width: 200px; height: 200px; background: white; border: 2px solid #ccc; border-radius: 20px; 
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 20px; box-sizing: border-box;
+            backface-visibility: hidden;
+        }
+        
+        .dot { width: 40px; height: 40px; background: #333; border-radius: 50%; opacity: 0; }
+        
+        .f1 .dot:nth-child(5) { opacity: 1; }
+        .f2 .dot:nth-child(1), .f2 .dot:nth-child(9) { opacity: 1; }
+        .f3 .dot:nth-child(1), .f3 .dot:nth-child(5), .f3 .dot:nth-child(9) { opacity: 1; }
+        .f4 .dot:nth-child(1), .f4 .dot:nth-child(3), .f4 .dot:nth-child(7), .f4 .dot:nth-child(9) { opacity: 1; }
+        .f5 .dot:nth-child(1), .f5 .dot:nth-child(3), .f5 .dot:nth-child(5), .f5 .dot:nth-child(7), .f5 .dot:nth-child(9) { opacity: 1; }
+        .f6 .dot:nth-child(1), .f6 .dot:nth-child(3), .f6 .dot:nth-child(4), .f6 .dot:nth-child(6), .f6 .dot:nth-child(7), .f6 .dot:nth-child(9) { opacity: 1; }
+
+        .front { transform: translateZ(100px); }
+        .back { transform: rotateY(180deg) translateZ(100px); }
+        .right { transform: rotateY(90deg) translateZ(100px); }
+        .left { transform: rotateY(-90deg) translateZ(100px); }
+        .top { transform: rotateX(90deg) translateZ(100px); }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; border: none; border-radius: 5px; background: #e74c3c; color: white; margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="cube" id="cube">
+            <div class="face front f1"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="face back f6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="face right f2"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="face left f5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="face top f3"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="face bottom f4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        </div>
+    </div>
+
+    <button onclick="rolarDado()">Rolar Dado</button>
+    <p><input type="checkbox" id="somCheck" checked> Som ativado</p>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let rotX = 0;
+        let rotY = 0;
+        
+        function tocarSom() {
+            if (!document.getElementById('somCheck').checked) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function rolarDado() {
+            const cube = document.getElementById('cube');
+            tocarSom();
+            
+            // Incrementamos os valores anteriores para garantir que ele sempre gire a partir de onde parou
+            rotX += (Math.floor(Math.random() * 4) + 4) * 90;
+            rotY += (Math.floor(Math.random() * 4) + 4) * 90;
+            
+            cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        }
+    </script>
+</body>
+</html>
